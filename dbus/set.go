@@ -14,28 +14,43 @@
 
 package dbus
 
+import (
+	"sync"
+)
+
 type set struct {
 	data map[string]bool
+	sync.Mutex
 }
 
 func (s *set) Add(value string) {
+	s.Lock()
+	defer s.Unlock()
 	s.data[value] = true
 }
 
 func (s *set) Remove(value string) {
+	s.Lock()
+	defer s.Unlock()
 	delete(s.data, value)
 }
 
 func (s *set) Contains(value string) (exists bool) {
+	s.Lock()
+	defer s.Unlock()
 	_, exists = s.data[value]
 	return
 }
 
 func (s *set) Length() int {
+	s.Lock()
+	defer s.Unlock()
 	return len(s.data)
 }
 
 func (s *set) Values() (values []string) {
+	s.Lock()
+	defer s.Unlock()
 	for val := range s.data {
 		values = append(values, val)
 	}
@@ -43,5 +58,5 @@ func (s *set) Values() (values []string) {
 }
 
 func newSet() *set {
-	return &set{make(map[string]bool)}
+	return &set{data: make(map[string]bool)}
 }
